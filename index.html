@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CampusOS · SRMU Lucknow</title>
+<meta name="description" content="CampusOS — the operating system for student life, configured for Shri Ramswaroop Memorial University, Lucknow. Download the Android app for phones and tablets.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  :root {
+    --maroon:   #8E1B34;
+    --maroon-2: #B22844;
+    --gold:     #C08A2D;
+    --ink:      #1A1210;
+    --paper:    #FAF5F2;
+    --paper-2:  #F3E9E4;
+    --card:     #FFFFFF;
+    --muted:    #6F5B5E;
+    --line:     #ECDFDD;
+    --screen:   #F3E9E6;
+    --accent:   var(--maroon);
+    --on-accent:#FFFFFF;
+    --glow:     rgba(178,40,68,.20);
+    --shadow:   0 2px 6px rgba(26,18,16,.05), 0 22px 55px -20px rgba(142,27,52,.30);
+    --shadow-lg:0 40px 90px -30px rgba(142,27,52,.45);
+  }
+  :root[data-theme="dark"] {
+    --maroon:#E14A67; --maroon-2:#F26E86; --gold:#E0B25A; --ink:#F4EBE9; --paper:#120C0B;
+    --paper-2:#191110; --card:#1D1512; --muted:#B79EA0; --line:#33241F; --screen:#241713;
+    --on-accent:#160A0C; --glow:rgba(225,74,103,.22);
+    --shadow:0 2px 6px rgba(0,0,0,.4), 0 26px 65px -22px rgba(0,0,0,.72);
+    --shadow-lg:0 50px 110px -30px rgba(0,0,0,.85);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --maroon:#E14A67; --maroon-2:#F26E86; --gold:#E0B25A; --ink:#F4EBE9; --paper:#120C0B;
+      --paper-2:#191110; --card:#1D1512; --muted:#B79EA0; --line:#33241F; --screen:#241713;
+      --on-accent:#160A0C; --glow:rgba(225,74,103,.22);
+      --shadow:0 2px 6px rgba(0,0,0,.4), 0 26px 65px -22px rgba(0,0,0,.72);
+      --shadow-lg:0 50px 110px -30px rgba(0,0,0,.85);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6; font-size: 17px; overflow-x: hidden;
+    transition: background .4s ease, color .4s ease;
+  }
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+  .mono  { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+           text-transform: uppercase; letter-spacing: .18em; font-size: 12px; }
+  .wrap  { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+  a { color: var(--accent); }
+
+  /* ---------- sticky nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--paper) 82%, transparent);
+    backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid transparent; transition: border-color .3s ease, background .3s ease;
+  }
+  .nav.scrolled { border-bottom-color: var(--line); }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 62px; gap: 14px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.02em; }
+  .brand .glyph {
+    width: 27px; height: 27px; border-radius: 8px; flex: none;
+    background: linear-gradient(150deg, var(--maroon), var(--maroon-2));
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
+    font-family: Georgia, serif; box-shadow: 0 4px 12px -3px var(--glow);
+  }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .nav-dl {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 650;
+    font-size: 14px; padding: 9px 16px; border-radius: 10px; background: var(--accent);
+    color: var(--on-accent); box-shadow: 0 6px 16px -6px var(--glow);
+    opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity .3s ease, transform .3s ease;
+  }
+  .nav.scrolled .nav-dl { opacity: 1; transform: none; pointer-events: auto; }
+  .nav-dl svg { width: 16px; height: 16px; }
+  .toggle {
+    width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: var(--card);
+    color: var(--ink); display: grid; place-items: center; cursor: pointer; flex: none;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .toggle:hover { border-color: var(--maroon); transform: translateY(-1px); }
+  .toggle svg { width: 18px; height: 18px; }
+  .toggle .moon { display: none; }
+  :root[data-theme="dark"] .toggle .sun { display: none; }
+  :root[data-theme="dark"] .toggle .moon { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .toggle .sun { display: none; }
+    :root:not([data-theme="light"]) .toggle .moon { display: block; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero { position: relative; overflow: hidden; }
+  .hero .glow {
+    position: absolute; top: -18%; right: -8%; width: 60vw; height: 60vw; max-width: 720px; max-height: 720px;
+    background: radial-gradient(circle at center, var(--glow), transparent 66%);
+    filter: blur(10px); z-index: 0; pointer-events: none;
+    animation: float-glow 14s ease-in-out infinite;
+  }
+  @keyframes float-glow { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-3%,4%) scale(1.08); } }
+  .hero .wrap {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1.05fr .95fr; gap: 46px; align-items: center;
+    padding: 76px 28px 66px;
+  }
+  .eyebrow { color: var(--maroon-2); display: inline-flex; align-items: center; gap: 9px; }
+  .eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--maroon-2); display: inline-block; }
+  h1.title {
+    font-size: clamp(41px, 6.6vw, 78px); line-height: .97; letter-spacing: -.03em;
+    margin: 20px 0 0; font-weight: 800; text-wrap: balance;
+  }
+  h1.title em { font-style: italic; color: var(--maroon); font-weight: 700; }
+  .lede { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 43ch; margin: 22px 0 0; }
+  .deploy {
+    display: inline-flex; align-items: center; gap: 10px; margin: 28px 0 0;
+    padding: 8px 15px 8px 12px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--card); box-shadow: var(--shadow); font-size: 14px; color: var(--muted);
+  }
+  .deploy .live { position: relative; width: 9px; height: 9px; flex: none; }
+  .deploy .live::before, .deploy .live::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--maroon-2);
+  }
+  .deploy .live::after { animation: ping 2s cubic-bezier(0,0,.2,1) infinite; }
+  @keyframes ping { 75%,100% { transform: scale(2.4); opacity: 0; } }
+  .deploy b { color: var(--ink); font-weight: 600; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin: 30px 0 0; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 11px; text-decoration: none;
+    padding: 15px 25px; border-radius: 13px; font-weight: 650; font-size: 16px;
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  }
+  .btn svg { width: 20px; height: 20px; flex: none; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); box-shadow: 0 12px 30px -10px var(--glow); }
+  .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -12px var(--glow); }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--maroon); transform: translateY(-2px); }
+  .platforms { margin: 14px 0 0; color: var(--muted); font-size: 13.5px; }
+
+  /* ---------- phone mock ---------- */
+  .stage { display: grid; place-items: center; perspective: 1400px; }
+  .phone {
+    width: 304px; max-width: 78vw; aspect-ratio: 300 / 620; position: relative;
+    border-radius: 42px; padding: 11px;
+    background: linear-gradient(160deg, #241a18 0%, #100b0a 100%);
+    box-shadow: var(--shadow-lg), inset 0 0 0 1.5px rgba(255,255,255,.07);
+    transform: rotateY(-11deg) rotateX(5deg) rotateZ(1deg);
+    transition: transform .5s cubic-bezier(.2,.7,.2,1);
+    animation: bob 6s ease-in-out infinite;
+  }
+  .phone:hover { transform: rotateY(-3deg) rotateX(2deg); }
+  @keyframes bob { 0%,100% { translate: 0 0; } 50% { translate: 0 -12px; } }
+  .phone::after { /* notch */
+    content: ""; position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 22px; border-radius: 12px; background: #0c0807; z-index: 3;
+  }
+  .screen {
+    position: absolute; inset: 11px; border-radius: 31px; overflow: hidden;
+    background: var(--screen); color: var(--ink); display: flex; flex-direction: column;
+    font-size: 12px;
+  }
+  .s-top {
+    padding: 30px 16px 14px; background: linear-gradient(160deg, var(--maroon), var(--maroon-2));
+    color: #fff;
+  }
+  .s-top .hi { font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+  .s-top .sub { font-size: 11.5px; opacity: .85; margin-top: 2px; }
+  .s-body { padding: 14px 14px 0; flex: 1; overflow: hidden; }
+  .s-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 700; }
+  .s-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 13px;
+    padding: 11px 12px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center;
+    animation: slidein .6s both;
+  }
+  .s-card:nth-child(2) { animation-delay: .3s; }
+  .s-card:nth-child(4) { animation-delay: .5s; }
+  .s-card:nth-child(5) { animation-delay: .7s; }
+  @keyframes slidein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .s-card .ic { width: 34px; height: 34px; border-radius: 9px; flex: none; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--maroon) 12%, transparent); color: var(--maroon); }
+  .s-card .ic svg { width: 18px; height: 18px; }
+  .s-card .t { font-weight: 700; font-size: 12.5px; }
+  .s-card .m { color: var(--muted); font-size: 11px; margin-top: 1px; }
+  .s-card .price { margin-left: auto; font-weight: 800; color: var(--maroon); font-size: 13px; }
+  .s-nav {
+    display: flex; justify-content: space-around; padding: 11px 0 16px; background: var(--card);
+    border-top: 1px solid var(--line); color: var(--muted);
+  }
+  .s-nav span { width: 20px; height: 20px; display: grid; place-items: center; }
+  .s-nav span:first-child { color: var(--maroon); }
+  .s-nav svg { width: 20px; height: 20px; }
+
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 46px; padding-top: 52px; }
+    .stage { order: -1; }
+    .phone { transform: none; animation: bob 6s ease-in-out infinite; }
+  }
+
+  /* ---------- stats strip ---------- */
+  .stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--paper-2); }
+  .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 34px 28px; text-align: center; }
+  .stat .n { font-family: Georgia, serif; font-size: clamp(30px, 4.5vw, 44px); font-weight: 800; letter-spacing: -.02em; color: var(--maroon); line-height: 1; }
+  .stat .l { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  @media (max-width: 560px) { .stats .wrap { grid-template-columns: 1fr 1fr; gap: 26px 20px; } }
+
+  /* ---------- sections ---------- */
+  section.block { padding: 70px 0; }
+  section.block + section.block { border-top: 1px solid var(--line); }
+  .kicker { color: var(--maroon-2); font-weight: 700; }
+  h2.head { font-size: clamp(27px, 3.8vw, 36px); letter-spacing: -.02em; margin: 12px 0 0; font-weight: 800; text-wrap: balance; }
+  .sub-copy { color: var(--muted); max-width: 58ch; margin: 14px 0 0; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 40px 0 0; }
+  .f {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px 21px;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .f:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--maroon) 40%, var(--line)); box-shadow: var(--shadow); }
+  .f .fi { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 15px;
+    background: linear-gradient(150deg, color-mix(in srgb, var(--maroon) 16%, transparent), color-mix(in srgb, var(--gold) 14%, transparent)); color: var(--maroon); }
+  .f .fi svg { width: 21px; height: 21px; }
+  .f h3 { margin: 0 0 5px; font-size: 17px; }
+  .f p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+  @media (max-width: 820px) { .features { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .features { grid-template-columns: 1fr; } }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; margin: 28px 0 0; }
+  .chip { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; padding: 7px 12px;
+    border: 1px solid var(--line); border-radius: 9px; background: var(--card); }
+
+  ol.steps { counter-reset: s; list-style: none; margin: 32px 0 0; padding: 0; max-width: 62ch; }
+  ol.steps li { counter-increment: s; position: relative; padding: 0 0 24px 56px; color: var(--muted); }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: -3px; width: 36px; height: 36px;
+    border-radius: 11px; display: grid; place-items: center; font-weight: 800; font-size: 15px;
+    color: var(--on-accent); background: linear-gradient(150deg, var(--maroon), var(--maroon-2));
+    font-family: ui-monospace, Menlo, monospace; box-shadow: 0 8px 20px -8px var(--glow);
+  }
+  ol.steps li:last-child { padding-bottom: 0; }
+  ol.steps strong { color: var(--ink); }
+  code.k { font-family: ui-monospace, Menlo, monospace; font-size: 13.5px; padding: 1px 7px; border-radius: 6px;
+    background: color-mix(in srgb, var(--maroon) 12%, transparent); color: var(--maroon); }
+
+  .callout { margin: 30px 0 0; background: color-mix(in srgb, var(--maroon) 6%, var(--card));
+    border: 1px solid var(--line); border-left: 3px solid var(--maroon); border-radius: 12px;
+    padding: 17px 19px; color: var(--muted); font-size: 14.5px; }
+  .callout strong { color: var(--ink); }
+
+  .final { text-align: center; }
+  .final .btn { margin: 26px auto 0; }
+
+  footer { border-top: 1px solid var(--line); padding: 42px 0 72px; color: var(--muted); font-size: 13.5px; }
+  footer .brand { margin-bottom: 10px; font-size: 18px; }
+
+  /* ---------- scroll reveal ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); transition-delay: var(--d, 0s); }
+    .reveal.in { opacity: 1; transform: none; }
+  }
+  :focus-visible { outline: 2px solid var(--maroon); outline-offset: 3px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <div class="brand"><span class="glyph">C</span> CampusOS</div>
+    <div class="nav-right">
+      <button class="toggle" id="toggle" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+      </button>
+      <a class="nav-dl" href="https://github.com/Praful9star/campusos-app/releases/download/apk-latest/app-srmu-release.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        Download
+      </a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="glow"></div>
+  <div class="wrap">
+    <div>
+      <div class="mono eyebrow reveal">The operating system for student life</div>
+      <h1 class="title serif reveal" style="--d:.06s">One campus.<br><em>One app.</em></h1>
+      <p class="lede reveal" style="--d:.12s">Buy &amp; sell, clubs, events, notes, chat, and an AI campus assistant — everything at Shri Ramswaroop Memorial University, in a single place tied to your verified student identity.</p>
+
+      <div class="deploy reveal" style="--d:.18s"><span class="live"></span><span>Live · <b>SRMU Lucknow</b> pilot</span></div>
+
+      <div class="cta reveal" style="--d:.24s">
+        <a class="btn primary" href="https://github.com/Praful9star/campusos-app/releases/download/apk-latest/app-srmu-release.apk">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+          Download the app
+        </a>
+        <a class="btn ghost" href="#install">How to install</a>
+      </div>
+      <p class="platforms reveal" style="--d:.3s">Android phones &amp; tablets · free · ~28&nbsp;MB</p>
+    </div>
+
+    <div class="stage reveal" style="--d:.2s">
+      <div class="phone" role="img" aria-label="Preview of the CampusOS app home screen">
+        <div class="screen">
+          <div class="s-top">
+            <div class="hi">Hey, Aman 👋</div>
+            <div class="sub">What's happening on campus</div>
+          </div>
+          <div class="s-body">
+            <p class="s-label">Upcoming events</p>
+            <div class="s-card">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+              <div><div class="t">Robotics Club · Kickoff Night</div><div class="m">Tue, 18:00 · Auditorium</div></div>
+            </div>
+            <p class="s-label" style="margin-top:14px">Fresh in the marketplace</p>
+            <div class="s-card">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1-5h16l1 5M4 9v11h16V9M9 13h6"/></svg></span>
+              <div><div class="t">Casio FX-991 calculator</div><div class="m">Like new · Hostel B</div></div>
+              <div class="price">₹450</div>
+            </div>
+            <div class="s-card">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5m0 0l6 4 4-4 6 4v12l-6-4-4 4-6-4"/></svg></span>
+              <div><div class="t">Cycle — barely used</div><div class="m">Good · Gate 2</div></div>
+              <div class="price">₹2,000</div>
+            </div>
+          </div>
+          <div class="s-nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1-5h16l1 5M4 9v11h16V9"/></svg></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="wrap">
+    <div class="stat reveal"><div class="n" data-count="8">8</div><div class="l">Modules, one app</div></div>
+    <div class="stat reveal" style="--d:.08s"><div class="n" data-count="2">2</div><div class="l">Universities live</div></div>
+    <div class="stat reveal" style="--d:.16s"><div class="n" data-count="100" data-suffix="%">100%</div><div class="l">Verified students</div></div>
+    <div class="stat reveal" style="--d:.24s"><div class="n" data-count="0" data-prefix="₹">₹0</div><div class="l">To download</div></div>
+  </div>
+</div>
+
+<section class="block">
+  <div class="wrap">
+    <div class="kicker mono reveal">Why it exists</div>
+    <h2 class="head serif reveal" style="--d:.06s">Stop juggling ten apps for one campus.</h2>
+    <p class="sub-copy reveal" style="--d:.12s">Right now it's scattered WhatsApp groups, spreadsheets, the ERP portal, and marketplace DMs with strangers. CampusOS puts it in one app where <strong style="color:var(--ink)">everyone is a verified @srmu.ac.in student</strong> — so a seller is a real junior down the hall, an event RSVP knows who's coming, and notes are tagged to your actual course.</p>
+
+    <div class="features">
+      <div class="f reveal"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1-5h16l1 5M4 9v11h16V9M9 13h6"/></svg></div><h3>Marketplace</h3><p>Buy &amp; sell with verified students. Smart, typo-tolerant search, sort, condition &amp; price filters, saved items.</p></div>
+      <div class="f reveal" style="--d:.06s"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><h3>Clubs &amp; Events</h3><p>Club pages, announcements, and event listings with one-tap RSVP and live registration counts.</p></div>
+      <div class="f reveal" style="--d:.12s"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h5"/></svg></div><h3>Notes</h3><p>Share course notes, download for offline, filter by course code, report bad uploads.</p></div>
+      <div class="f reveal"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3>Chat</h3><p>Real-time messaging with sellers and classmates, straight from any listing.</p></div>
+      <div class="f reveal" style="--d:.06s"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div><h3>Lost &amp; Found</h3><p>Report and claim lost items across campus, with contact built right in.</p></div>
+      <div class="f reveal" style="--d:.12s"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg></div><h3>AI Assistant</h3><p>Ask campus questions and get answers drawn from clubs, events, and FAQs.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="kicker mono reveal">Under the hood</div>
+    <h2 class="head serif reveal" style="--d:.06s">Built like a real product.</h2>
+    <p class="sub-copy reveal" style="--d:.12s">Clean Architecture on both sides, one codebase, per-university build flavour — SRMU and CUVerse ship from the same source.</p>
+    <div class="chips reveal" style="--d:.18s">
+      <span class="chip">Flutter</span><span class="chip">Riverpod</span><span class="chip">GoRouter</span>
+      <span class="chip">FastAPI</span><span class="chip">PostgreSQL + pgvector</span><span class="chip">Redis Streams</span>
+      <span class="chip">Render</span><span class="chip">Neon</span><span class="chip">Upstash</span>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="install">
+  <div class="wrap">
+    <div class="kicker mono reveal">Get started</div>
+    <h2 class="head serif reveal" style="--d:.06s">Install it in four steps.</h2>
+    <ol class="steps">
+      <li class="reveal"><strong>Download</strong> the app with the button at the top (Android phone or tablet).</li>
+      <li class="reveal" style="--d:.06s"><strong>Open the file.</strong> Android will ask to allow installs from this source — allow it (normal for any app outside the Play Store).</li>
+      <li class="reveal" style="--d:.12s"><strong>Sign up</strong> with your <code class="k">@srmu.ac.in</code> email and a password.</li>
+      <li class="reveal" style="--d:.18s"><strong>Verify</strong> with the code sent to your inbox, and you're in.</li>
+    </ol>
+    <div class="callout reveal"><strong>Note:</strong> this is a free pilot deployment. The server sleeps when idle, so the very first request after a while takes about a minute — just wait or retry once, and it's fast after that.</div>
+  </div>
+</section>
+
+<section class="block final">
+  <div class="wrap">
+    <h2 class="head serif reveal">Ready when you are.</h2>
+    <p class="sub-copy reveal" style="--d:.06s; margin-left:auto; margin-right:auto;">One download, your @srmu.ac.in email, and the whole campus is in your pocket.</p>
+    <a class="btn primary reveal" style="--d:.12s" href="https://github.com/Praful9star/campusos-app/releases/download/apk-latest/app-srmu-release.apk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+      Download for Android
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand"><span class="glyph">C</span> CampusOS</div>
+    An independent student project · configured for Shri Ramswaroop Memorial University, Lucknow · not an official university application.
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Theme toggle, remembered across visits.
+    var root = document.documentElement;
+    try {
+      var saved = localStorage.getItem("campusos-theme");
+      if (saved) root.setAttribute("data-theme", saved);
+    } catch (e) {}
+    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+    var currentTheme = function () {
+      var attr = root.getAttribute("data-theme");
+      if (attr === "dark" || attr === "light") return attr;
+      return prefersDark.matches ? "dark" : "light";
+    };
+    var btn = document.getElementById("toggle");
+    if (btn) btn.addEventListener("click", function () {
+      var next = currentTheme() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("campusos-theme", next); } catch (e) {}
+    });
+
+    // Sticky-nav border + download button on scroll.
+    var nav = document.getElementById("nav");
+    var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 40); };
+    onScroll(); window.addEventListener("scroll", onScroll, { passive: true });
+
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Scroll reveal.
+    var reveals = document.querySelectorAll(".reveal");
+    if (reduce || !("IntersectionObserver" in window)) {
+      reveals.forEach(function (el) { el.classList.add("in"); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+      reveals.forEach(function (el) { io.observe(el); });
+    }
+
+    // Count-up stats when they scroll into view.
+    var counts = document.querySelectorAll("[data-count]");
+    var animateCount = function (el) {
+      var target = parseInt(el.getAttribute("data-count"), 10) || 0;
+      var prefix = el.getAttribute("data-prefix") || "";
+      var suffix = el.getAttribute("data-suffix") || "";
+      if (reduce || target === 0) { el.textContent = prefix + target + suffix; return; }
+      var start = null, dur = 1100;
+      var step = function (ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = prefix + Math.round(eased * target) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+    if (!("IntersectionObserver" in window)) {
+      counts.forEach(animateCount);
+    } else {
+      var cio = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { animateCount(en.target); cio.unobserve(en.target); }
+        });
+      }, { threshold: 0.6 });
+      counts.forEach(function (el) { cio.observe(el); });
+    }
+  })();
+</script>
+</body>
+</html>
